@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IRIN Legal — Document Workplace Violations</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3.storage@4.5.4/dist/bundle.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">⚖️</span>
+                <span class="logo-text">IRIN</span>
+                <span class="logo-badge">LEGAL</span>
+            </div>
+            <button id="chat-toggle" class="icon-btn" title="Get help">💬</button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Quick Upload Section -->
+            <section class="upload-section" id="upload-section">
+                <div class="section-header">
+                    <h1>Document a Violation</h1>
+                    <p class="subtitle">Take a photo. Get legal guidance. Protect yourself.</p>
+                </div>
+
+                <!-- Quick Capture -->
+                <div class="capture-box" id="capture-box">
+                    <input type="file" id="file-input" accept="image/*,video/*" capture="environment">
+                    <div class="capture-prompt">
+                        <span class="capture-icon">📷</span>
+                        <p>Tap to take photo or video</p>
+                        <span class="capture-hint">Auto-timestamped & hashed</span>
+                    </div>
+                </div>
+
+                <!-- Preview Area -->
+                <div class="preview-area" id="preview-area" style="display: none;">
+                    <img id="preview-image" src="" alt="Preview">
+                    <video id="preview-video" controls style="display: none;"></video>
+                    <div class="preview-meta">
+                        <span id="preview-timestamp"></span>
+                        <span id="preview-hash"></span>
+                    </div>
+                </div>
+
+                <!-- Violation Categories -->
+                <div class="categories-section" id="categories-section" style="display: none;">
+                    <h3>What type of violation?</h3>
+                    <p class="help-text">Tap all that apply. AI will analyze your photo.</p>
+                    
+                    <div class="category-grid">
+                        <button class="category-btn" data-category="electrical" data-severity="high">
+                            <span class="cat-icon">⚡</span>
+                            <span class="cat-label">Electrical</span>
+                            <span class="cat-desc">Wiring, panels, hazards</span>
+                        </button>
+                        <button class="category-btn" data-category="fire" data-severity="critical">
+                            <span class="cat-icon">🔥</span>
+                            <span class="cat-label">Fire Safety</span>
+                            <span class="cat-desc">Exits, alarms, suppression</span>
+                        </button>
+                        <button class="category-btn" data-category="chemical">
+                            <span class="cat-icon">☠️</span>
+                            <span class="cat-label">Chemical</span>
+                            <span class="cat-desc">Spills, storage, PPE</span>
+                        </button>
+                        <button class="category-btn" data-category="structural">
+                            <span class="cat-icon">🏗️</span>
+                            <span class="cat-label">Structural</span>
+                            <span class="cat-desc">Buildings, equipment</span>
+                        </button>
+                        <button class="category-btn" data-category="environmental">
+                            <span class="cat-icon">🌊</span>
+                            <span class="cat-label">Environmental</span>
+                            <span class="cat-desc">Water, air, waste</span>
+                        </button>
+                        <button class="category-btn" data-category="labor">
+                            <span class="cat-icon">👷</span>
+                            <span class="cat-label">Labor</span>
+                            <span class="cat-desc">Hours, safety, rights</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Analysis Results -->
+                <div class="ai-analysis" id="ai-analysis" style="display: none;">
+                    <div class="ai-header">
+                        <span class="ai-icon">🤖</span>
+                        <span>AI Analysis</span>
+                    </div>
+                    <div class="ai-content" id="ai-content">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Quick Note -->
+                <div class="note-section" id="note-section" style="display: none;">
+                    <h3>Add Details (Optional)</h3>
+                    <textarea id="violation-note" placeholder="What happened? Who was involved? When did you report it?"></textarea>
+                </div>
+
+                <!-- Location -->
+                <div class="location-section" id="location-section" style="display: none;">
+                    <button id="add-location" class="btn-secondary">
+                        <span>📍</span> Add Location
+                    </button>
+                    <p class="location-hint">Helps connect you to local legal resources</p>
+                </div>
+
+                <!-- Submit -->
+                <div class="submit-section" id="submit-section" style="display: none;">
+                    <button id="submit-btn" class="btn-primary">
+                        <span>🔒</span> Secure to Blockchain
+                    </button>
+                    <p class="submit-hint">Your evidence will be permanently timestamped and tamper-proof</p>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress-section" id="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <p class="progress-text" id="progress-text">Uploading to decentralized storage...</p>
+                </div>
+
+                <!-- Success -->
+                <div class="success-section" id="success-section" style="display: none;">
+                    <div class="success-icon">✅</div>
+                    <h3>Evidence Secured</h3>
+                    <p>Your documentation is now permanently recorded.</p>
+                    
+                    <div class="evidence-card">
+                        <div class="evidence-row">
+                            <span>Transaction:</span>
+                            <code id="tx-hash"></code>
+                        </div>
+                        <div class="evidence-row">
+                            <span>IPFS Hash:</span>
+                            <code id="ipfs-hash"></code>
+                        </div>
+                        <div class="evidence-row">
+                            <span>Timestamp:</span>
+                            <span id="success-timestamp"></span>
+                        </div>
+                    </div>
+
+                    <div class="next-steps">
+                        <h4>What should I do now?</h4>
+                        <button id="btn-find-lawyer" class="btn-outline">Find a Lawyer</button>
+                        <button id="btn-report-osha" class="btn-outline">Report to OSHA</button>
+                        <button id="btn-save-proof" class="btn-outline">Save Proof</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Cases Section -->
+            <section class="cases-section" id="cases-section" style="display: none;">
+                <h2>My Documented Cases</h2>
+                <div class="cases-list" id="cases-list">
+                    <p class="empty-state">No cases yet. Tap the camera to document your first violation.</p>
+                </div>
+            </section>
+
+            <!-- Legal Resources Section -->
+            <section class="resources-section" id="resources-section" style="display: none;">
+                <h2>Legal Resources</h2>
+                
+                <div class="resource-category">
+                    <h3>🆘 Immediate Help</h3>
+                    <div class="resource-list">
+                        <a href="tel:1-800-321-6742" class="resource-card urgent">
+                            <span class="resource-icon">📞</span>
+                            <div>
+                                <strong>OSHA Hotline</strong>
+                                <span>1-800-321-OSHA (6742)</span>
+                            </div>
+                        </a>
+                        <a href="tel:311" class="resource-card urgent">
+                            <span class="resource-icon">🏙️</span>
+                            <div>
+                                <strong>City Services (311)</strong>
+                                <span>Local code violations</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="resource-category">
+                    <h3>⚖️ Employment Lawyers</h3>
+                    <div class="resource-list" id="lawyer-list">
+                        <!-- Populated by JS based on location -->
+                        <div class="resource-card">
+                            <span class="resource-icon">👨‍⚖️</span>
+                            <div>
+                                <strong>Enable location</strong>
+                                <span>to find lawyers near you</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resource-category">
+                    <h3>📚 Know Your Rights</h3>
+                    <div class="resource-list">
+                        <a href="https://www.osha.gov/workers" target="_blank" class="resource-card">
+                            <span class="resource-icon">📋</span>
+                            <div>
+                                <strong>OSHA Worker Rights</strong>
+                                <span>osha.gov/workers</span>
+                            </div>
+                        </a>
+                        <a href="https://www.whistleblowers.gov" target="_blank" class="resource-card">
+                            <span class="resource-icon">🛡️</span>
+                            <div>
+                                <strong>Whistleblower Protection</strong>
+                                <span>whistleblowers.gov</span>
+                            </div>
+                        </a>
+                        <a href="https://www.nlrb.gov" target="_blank" class="resource-card">
+                            <span class="resource-icon">🤝</span>
+                            <div>
+                                <strong>National Labor Relations Board</strong>
+                                <span>nlrb.gov</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-section="upload-section">
+                <span>📷</span>
+                <span>Document</span>
+            </button>
+            <button class="nav-btn" data-section="cases-section">
+                <span>📁</span>
+                <span>My Cases</span>
+            </button>
+            <button class="nav-btn" data-section="resources-section">
+                <span>⚖️</span>
+                <span>Resources</span>
+            </button>
+        </nav>
+
+        <!-- Chat Assistant -->
+        <div class="chat-panel" id="chat-panel">
+            <div class="chat-header">
+                <span>🤖 IRIN Assistant</span>
+                <button id="chat-close">✕</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-message bot">
+                    <p>Hi! I'm here to help you document workplace violations safely.</p>
+                    <p><strong>What would you like to do?</strong></p>
+                </div>
+                <div class="chat-options">
+                    <button class="chat-option" data-action="document">📷 Document a violation</button>
+                    <button class="chat-option" data-action="know-rights">📚 Know my rights</button>
+                    <button class="chat-option" data-action="find-lawyer">⚖️ Find a lawyer</button>
+                    <button class="chat-option" data-action="report">📞 Report to authorities</button>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-text" placeholder="Type your question...">
+                <button id="chat-send">➤</button>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div id="toast-container"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
