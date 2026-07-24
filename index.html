@@ -2,282 +2,323 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IRIN Legal — Document Workplace Violations</title>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3.storage@4.5.4/dist/bundle.umd.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRIN — Infrastructure Risk Intelligence Network</title>
+    
+    <!-- CesiumJS -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.110/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="app">
         <!-- Header -->
-        <header class="app-header">
-            <div class="logo">
-                <span class="logo-icon">⚖️</span>
+        <header class="irin-header">
+            <div class="logo" title="Infrastructure Risk Intelligence Network">
+                <span class="logo-pulse"></span>
                 <span class="logo-text">IRIN</span>
-                <span class="logo-badge">LEGAL</span>
+                <span class="logo-badge">BETA</span>
             </div>
-            <button id="chat-toggle" class="icon-btn" title="Get help">💬</button>
+            <div class="header-center">
+                <span class="tagline">Map. Hash. Verify.</span>
+            </div>
+            <div class="header-stats">
+                <div class="stat" title="Total evidence entries">
+                    <span class="stat-value" id="entry-count">0</span>
+                    <span class="stat-label">ENTRIES</span>
+                </div>
+                <div class="stat" title="Ledger integrity status">
+                    <span class="stat-indicator" id="integrity-status">●</span>
+                    <span class="stat-label">SECURE</span>
+                </div>
+            </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Quick Upload Section -->
-            <section class="upload-section" id="upload-section">
-                <div class="section-header">
-                    <h1>Document a Violation</h1>
-                    <p class="subtitle">Take a photo. Get legal guidance. Protect yourself.</p>
-                </div>
-
-                <!-- Quick Capture -->
-                <div class="capture-box" id="capture-box">
-                    <input type="file" id="file-input" accept="image/*,video/*" capture="environment">
-                    <div class="capture-prompt">
-                        <span class="capture-icon">📷</span>
-                        <p>Tap to take photo or video</p>
-                        <span class="capture-hint">Auto-timestamped & hashed</span>
-                    </div>
-                </div>
-
-                <!-- Preview Area -->
-                <div class="preview-area" id="preview-area" style="display: none;">
-                    <img id="preview-image" src="" alt="Preview">
-                    <video id="preview-video" controls style="display: none;"></video>
-                    <div class="preview-meta">
-                        <span id="preview-timestamp"></span>
-                        <span id="preview-hash"></span>
-                    </div>
-                </div>
-
-                <!-- Violation Categories -->
-                <div class="categories-section" id="categories-section" style="display: none;">
-                    <h3>What type of violation?</h3>
-                    <p class="help-text">Tap all that apply. AI will analyze your photo.</p>
-                    
-                    <div class="category-grid">
-                        <button class="category-btn" data-category="electrical" data-severity="high">
-                            <span class="cat-icon">⚡</span>
-                            <span class="cat-label">Electrical</span>
-                            <span class="cat-desc">Wiring, panels, hazards</span>
-                        </button>
-                        <button class="category-btn" data-category="fire" data-severity="critical">
-                            <span class="cat-icon">🔥</span>
-                            <span class="cat-label">Fire Safety</span>
-                            <span class="cat-desc">Exits, alarms, suppression</span>
-                        </button>
-                        <button class="category-btn" data-category="chemical">
-                            <span class="cat-icon">☠️</span>
-                            <span class="cat-label">Chemical</span>
-                            <span class="cat-desc">Spills, storage, PPE</span>
-                        </button>
-                        <button class="category-btn" data-category="structural">
-                            <span class="cat-icon">🏗️</span>
-                            <span class="cat-label">Structural</span>
-                            <span class="cat-desc">Buildings, equipment</span>
-                        </button>
-                        <button class="category-btn" data-category="environmental">
-                            <span class="cat-icon">🌊</span>
-                            <span class="cat-label">Environmental</span>
-                            <span class="cat-desc">Water, air, waste</span>
-                        </button>
-                        <button class="category-btn" data-category="labor">
-                            <span class="cat-icon">👷</span>
-                            <span class="cat-label">Labor</span>
-                            <span class="cat-desc">Hours, safety, rights</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- AI Analysis Results -->
-                <div class="ai-analysis" id="ai-analysis" style="display: none;">
-                    <div class="ai-header">
-                        <span class="ai-icon">🤖</span>
-                        <span>AI Analysis</span>
-                    </div>
-                    <div class="ai-content" id="ai-content">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-
-                <!-- Quick Note -->
-                <div class="note-section" id="note-section" style="display: none;">
-                    <h3>Add Details (Optional)</h3>
-                    <textarea id="violation-note" placeholder="What happened? Who was involved? When did you report it?"></textarea>
-                </div>
-
-                <!-- Location -->
-                <div class="location-section" id="location-section" style="display: none;">
-                    <button id="add-location" class="btn-secondary">
-                        <span>📍</span> Add Location
+        <!-- Main View -->
+        <main class="irin-main">
+            <!-- Globe Container -->
+            <div id="globe-container">
+                <div id="cesium-container"></div>
+                <div id="leaflet-container"></div>
+                
+                <!-- Mode Badge -->
+                <div class="mode-badge" id="mode-badge">3D</div>
+                
+                <!-- Help Button -->
+                <button id="help-btn" class="help-btn" title="How to use IRIN">?</button>
+                
+                <!-- Globe Controls -->
+                <div class="globe-controls">
+                    <button id="toggle-mode" class="control-btn" title="Switch 2D/3D view">
+                        <span>2D/3D</span>
                     </button>
-                    <p class="location-hint">Helps connect you to local legal resources</p>
+                    <button id="reset-view" class="control-btn" title="Reset to world view">
+                        <span>⌂</span>
+                    </button>
+                    <button id="toggle-heatmap" class="control-btn active" title="Show/hide risk heatmap">
+                        <span>◧</span>
+                    </button>
                 </div>
+                
+                <!-- Legend -->
+                <div class="map-legend">
+                    <div class="legend-title">RISK LEVEL</div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #22c55e;"></span>
+                        <span>Low</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #eab308;"></span>
+                        <span>Moderate</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #f97316;"></span>
+                        <span>High</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: #dc2626;"></span>
+                        <span>Critical</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Panel -->
+            <aside class="side-panel" id="side-panel">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active" data-step="1">1. Upload</div>
+                    <div class="step" data-step="2">2. Locate</div>
+                    <div class="step" data-step="3">3. Submit</div>
+                </div>
+
+                <!-- Upload Section -->
+                <section class="panel-section">
+                    <div class="section-header">
+                        <span class="section-number">1</span>
+                        <h3>UPLOAD EVIDENCE</h3>
+                    </div>
+                    <p class="section-hint">Upload photos, videos, or documents. Files are hashed in your browser — nothing is uploaded to any server.</p>
+                    <div class="upload-zone" id="upload-zone">
+                        <input type="file" id="file-input" multiple accept="image/*,video/*,application/pdf">
+                        <div class="upload-prompt">
+                            <span class="upload-icon">📁</span>
+                            <p>Drop file here or click to browse</p>
+                            <span class="upload-hint">JPG, PNG, MP4, PDF accepted</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Hash Display -->
+                <section class="panel-section hash-section" id="hash-section" style="display: none;">
+                    <div class="hash-header">
+                        <span class="hash-label">✓ FILE HASHED</span>
+                        <span class="hash-algo">SHA-256</span>
+                    </div>
+                    <div class="hash-display">
+                        <code id="hash-value"></code>
+                        <button id="copy-hash" class="icon-btn" title="Copy hash">⎘</button>
+                    </div>
+                    <p class="hash-explain">This unique fingerprint proves your file hasn't been altered.</p>
+                </section>
+
+                <!-- Location Section -->
+                <section class="panel-section">
+                    <div class="section-header">
+                        <span class="section-number">2</span>
+                        <h3>SET LOCATION</h3>
+                    </div>
+                    <p class="section-hint">Click anywhere on the map, use your current location, or enter coordinates.</p>
+                    <div class="location-actions">
+                        <button id="use-current-location" class="btn-location">
+                            <span>📍</span> Use My Location
+                        </button>
+                    </div>
+                    <div class="location-inputs">
+                        <div class="input-group">
+                            <label>Latitude</label>
+                            <input type="number" id="lat-input" placeholder="0.000000" step="any">
+                        </div>
+                        <div class="input-group">
+                            <label>Longitude</label>
+                            <input type="number" id="lng-input" placeholder="0.000000" step="any">
+                        </div>
+                    </div>
+                    <div class="location-selected" id="location-selected" style="display: none;">
+                        <span class="location-check">✓</span> Location set
+                    </div>
+                </section>
+
+                <!-- Risk Section -->
+                <section class="panel-section">
+                    <div class="section-header">
+                        <span class="section-number">3</span>
+                        <h3>RISK LEVEL</h3>
+                    </div>
+                    <p class="section-hint">How severe is the infrastructure risk you're reporting?</p>
+                    <div class="risk-selector">
+                        <button class="risk-btn" data-risk="1">
+                            <span class="risk-dot low"></span>
+                            <span class="risk-label">LOW</span>
+                        </button>
+                        <button class="risk-btn" data-risk="2">
+                            <span class="risk-dot moderate"></span>
+                            <span class="risk-label">MOD</span>
+                        </button>
+                        <button class="risk-btn active" data-risk="3">
+                            <span class="risk-dot high"></span>
+                            <span class="risk-label">HIGH</span>
+                        </button>
+                        <button class="risk-btn" data-risk="4">
+                            <span class="risk-dot critical"></span>
+                            <span class="risk-label">CRIT</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Description -->
+                <section class="panel-section">
+                    <h3>DESCRIPTION (OPTIONAL)</h3>
+                    <textarea id="description-input" rows="2" placeholder="What's happening at this location?"></textarea>
+                </section>
 
                 <!-- Submit -->
-                <div class="submit-section" id="submit-section" style="display: none;">
-                    <button id="submit-btn" class="btn-primary">
-                        <span>🔒</span> Secure to Blockchain
+                <section class="panel-section submit-section">
+                    <button id="submit-entry" class="btn-primary" disabled>
+                        <span class="btn-icon">⬆</span>
+                        <span class="btn-text">ADD TO GLOBAL LEDGER</span>
                     </button>
-                    <p class="submit-hint">Your evidence will be permanently timestamped and tamper-proof</p>
-                </div>
+                    <p class="submit-note">Your entry will be stored locally and visible on the map.</p>
+                </section>
 
-                <!-- Progress -->
-                <div class="progress-section" id="progress-section" style="display: none;">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
+                <!-- Recent Entries -->
+                <section class="panel-section entries-section">
+                    <h3>LATEST ENTRIES</h3>
+                    <div id="entries-list" class="entries-list">
+                        <p class="empty-state">No entries yet. Be the first to report.</p>
                     </div>
-                    <p class="progress-text" id="progress-text">Uploading to decentralized storage...</p>
-                </div>
+                </section>
 
-                <!-- Success -->
-                <div class="success-section" id="success-section" style="display: none;">
-                    <div class="success-icon">✅</div>
-                    <h3>Evidence Secured</h3>
-                    <p>Your documentation is now permanently recorded.</p>
-                    
-                    <div class="evidence-card">
-                        <div class="evidence-row">
-                            <span>Transaction:</span>
-                            <code id="tx-hash"></code>
-                        </div>
-                        <div class="evidence-row">
-                            <span>IPFS Hash:</span>
-                            <code id="ipfs-hash"></code>
-                        </div>
-                        <div class="evidence-row">
-                            <span>Timestamp:</span>
-                            <span id="success-timestamp"></span>
-                        </div>
-                    </div>
-
-                    <div class="next-steps">
-                        <h4>What should I do now?</h4>
-                        <button id="btn-find-lawyer" class="btn-outline">Find a Lawyer</button>
-                        <button id="btn-report-osha" class="btn-outline">Report to OSHA</button>
-                        <button id="btn-save-proof" class="btn-outline">Save Proof</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- My Cases Section -->
-            <section class="cases-section" id="cases-section" style="display: none;">
-                <h2>My Documented Cases</h2>
-                <div class="cases-list" id="cases-list">
-                    <p class="empty-state">No cases yet. Tap the camera to document your first violation.</p>
-                </div>
-            </section>
-
-            <!-- Legal Resources Section -->
-            <section class="resources-section" id="resources-section" style="display: none;">
-                <h2>Legal Resources</h2>
+                <!-- Actions -->
+                <section class="panel-section actions-section">
+                    <button id="verify-ledger" class="btn-outline">
+                        <span>🔍 Verify Ledger</span>
+                    </button>
+                    <button id="export-evidence" class="btn-outline">
+                        <span>📦 Export Data</span>
+                    </button>
+                    <button id="generate-anchor" class="btn-outline">
+                        <span>⚓ Create Anchor</span>
+                    </button>
+                </section>
                 
-                <div class="resource-category">
-                    <h3>🆘 Immediate Help</h3>
-                    <div class="resource-list">
-                        <a href="tel:1-800-321-6742" class="resource-card urgent">
-                            <span class="resource-icon">📞</span>
-                            <div>
-                                <strong>OSHA Hotline</strong>
-                                <span>1-800-321-OSHA (6742)</span>
-                            </div>
-                        </a>
-                        <a href="tel:311" class="resource-card urgent">
-                            <span class="resource-icon">🏙️</span>
-                            <div>
-                                <strong>City Services (311)</strong>
-                                <span>Local code violations</span>
-                            </div>
-                        </a>
-                    </div>
+                <!-- Footer Note -->
+                <div class="panel-footer">
+                    <p>🔒 Client-side only • No server • No blockchain</p>
+                    <p>Data stays in your browser</p>
                 </div>
-
-                <div class="resource-category">
-                    <h3>⚖️ Employment Lawyers</h3>
-                    <div class="resource-list" id="lawyer-list">
-                        <!-- Populated by JS based on location -->
-                        <div class="resource-card">
-                            <span class="resource-icon">👨‍⚖️</span>
-                            <div>
-                                <strong>Enable location</strong>
-                                <span>to find lawyers near you</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="resource-category">
-                    <h3>📚 Know Your Rights</h3>
-                    <div class="resource-list">
-                        <a href="https://www.osha.gov/workers" target="_blank" class="resource-card">
-                            <span class="resource-icon">📋</span>
-                            <div>
-                                <strong>OSHA Worker Rights</strong>
-                                <span>osha.gov/workers</span>
-                            </div>
-                        </a>
-                        <a href="https://www.whistleblowers.gov" target="_blank" class="resource-card">
-                            <span class="resource-icon">🛡️</span>
-                            <div>
-                                <strong>Whistleblower Protection</strong>
-                                <span>whistleblowers.gov</span>
-                            </div>
-                        </a>
-                        <a href="https://www.nlrb.gov" target="_blank" class="resource-card">
-                            <span class="resource-icon">🤝</span>
-                            <div>
-                                <strong>National Labor Relations Board</strong>
-                                <span>nlrb.gov</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </section>
+            </aside>
         </main>
 
-        <!-- Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-btn active" data-section="upload-section">
-                <span>📷</span>
-                <span>Document</span>
-            </button>
-            <button class="nav-btn" data-section="cases-section">
-                <span>📁</span>
-                <span>My Cases</span>
-            </button>
-            <button class="nav-btn" data-section="resources-section">
-                <span>⚖️</span>
-                <span>Resources</span>
-            </button>
-        </nav>
-
-        <!-- Chat Assistant -->
-        <div class="chat-panel" id="chat-panel">
-            <div class="chat-header">
-                <span>🤖 IRIN Assistant</span>
-                <button id="chat-close">✕</button>
-            </div>
-            <div class="chat-messages" id="chat-messages">
-                <div class="chat-message bot">
-                    <p>Hi! I'm here to help you document workplace violations safely.</p>
-                    <p><strong>What would you like to do?</strong></p>
+        <!-- Onboarding Modal -->
+        <div id="onboard-modal" class="modal active">
+            <div class="modal-content onboard-content">
+                <div class="onboard-header">
+                    <div class="onboard-logo">
+                        <span class="logo-pulse"></span>
+                        <span>IRIN</span>
+                    </div>
+                    <h1>Infrastructure Risk Intelligence Network</h1>
+                    <p class="onboard-subtitle">A global, tamper-evident map for reporting and tracking infrastructure risks.</p>
                 </div>
-                <div class="chat-options">
-                    <button class="chat-option" data-action="document">📷 Document a violation</button>
-                    <button class="chat-option" data-action="know-rights">📚 Know my rights</button>
-                    <button class="chat-option" data-action="find-lawyer">⚖️ Find a lawyer</button>
-                    <button class="chat-option" data-action="report">📞 Report to authorities</button>
+                
+                <div class="onboard-steps">
+                    <div class="onboard-step">
+                        <div class="step-icon">📁</div>
+                        <h3>Upload Evidence</h3>
+                        <p>Submit photos, videos, or documents. Each file gets a unique cryptographic hash — a digital fingerprint that proves it hasn't been altered.</p>
+                    </div>
+                    <div class="onboard-step">
+                        <div class="step-icon">🗺️</div>
+                        <h3>Map the Location</h3>
+                        <p>Pinpoint where the risk is occurring. Your report joins a global heatmap of infrastructure issues.</p>
+                    </div>
+                    <div class="onboard-step">
+                        <div class="step-icon">🔗</div>
+                        <h3>Build the Chain</h3>
+                        <p>Every entry links to the previous one, creating a tamper-evident ledger. Break the chain, and it's immediately detected.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="chat-input">
-                <input type="text" id="chat-text" placeholder="Type your question...">
-                <button id="chat-send">➤</button>
+                
+                <div class="onboard-tech">
+                    <span class="tech-badge">🔒 Client-side only</span>
+                    <span class="tech-badge">🌐 No server</span>
+                    <span class="tech-badge">💰 Free forever</span>
+                </div>
+                
+                <button id="start-btn" class="btn-primary btn-large">
+                    Start Mapping
+                </button>
+                
+                <p class="onboard-note">All data stays in your browser. Nothing is uploaded to any server.</p>
             </div>
         </div>
 
-        <!-- Toast -->
+        <!-- Verification Modal -->
+        <div id="verify-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Ledger Verification</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="verify-progress" class="verify-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <span class="progress-text">Checking chain integrity...</span>
+                    </div>
+                    <div id="verify-results" class="verify-results"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Anchor Modal -->
+        <div id="anchor-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Monthly Anchor</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="anchor-info">
+                        <p>This is a cumulative hash of all entries this month. Publish it anywhere (Twitter, GitHub, your website) to create a public timestamp proof.</p>
+                    </div>
+                    <div class="anchor-hash">
+                        <code id="anchor-value"></code>
+                        <button id="copy-anchor" class="icon-btn">⎘</button>
+                    </div>
+                    <div class="anchor-meta">
+                        <span id="anchor-date"></span>
+                        <span id="anchor-entries"></span>
+                    </div>
+                    <div class="anchor-actions">
+                        <button id="download-anchor" class="btn-secondary">Download Anchor File</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
         <div id="toast-container"></div>
     </div>
 
     <script src="app.js"></script>
+    <script src="verify.js"></script>
 </body>
 </html>
